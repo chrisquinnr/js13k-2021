@@ -1,0 +1,289 @@
+<html>
+  <head>
+    <script src="https://cdn.jsdelivr.net/npm/kontra@7.1.3/kontra.min.js"></script>
+    <style>
+      canvas {
+        padding-left: 0;
+        padding-right: 0;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+      }
+      html {
+        background-color: black;
+      }
+      #space,
+      .stars {
+        overflow: hidden;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+      .stars {
+        background-image: radial-gradient(
+            2px 2px at 20px 30px,
+            #eee,
+            rgba(0, 0, 0, 0)
+          ),
+          radial-gradient(2px 2px at 40px 70px, #fff, rgba(0, 0, 0, 0)),
+          radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0, 0, 0, 0)),
+          radial-gradient(2px 2px at 90px 40px, #fff, rgba(0, 0, 0, 0)),
+          radial-gradient(2px 2px at 130px 80px, #fff, rgba(0, 0, 0, 0)),
+          radial-gradient(2px 2px at 160px 120px, #ddd, rgba(0, 0, 0, 0));
+        background-repeat: repeat;
+        background-size: 200px 200px;
+        animation: zoom 5s infinite;
+        opacity: 0;
+      }
+
+      .stars:nth-child(1) {
+        background-position: 50% 50%;
+        animation-delay: 0s;
+      }
+      .stars:nth-child(2) {
+        background-position: 20% 60%;
+        animation-delay: 1s;
+      }
+      .stars:nth-child(3) {
+        background-position: -20% -30%;
+        animation-delay: 2s;
+      }
+      .stars:nth-child(4) {
+        background-position: 40% -80%;
+        animation-delay: 3s;
+      }
+      .stars:nth-child(5) {
+        background-position: -20% 30%;
+        animation-delay: 4s;
+      }
+
+      @keyframes zoom {
+        0% {
+          opacity: 0;
+          transform: scale(0.5);
+          animation-timing-function: ease-in;
+        }
+        85% {
+          opacity: 1;
+          transform: scale(2.8);
+          animation-timing-function: linear;
+        }
+        100% {
+          opacity: 0;
+          transform: scale(3.5);
+        }
+      }
+      #startContainer {
+        position: fixed;
+        top: 30%;
+        z-index: 99999;
+      }
+      #scoreBoard {
+        font-size: 100px;
+        color: white;
+      }
+      .hidden {
+        display: none;
+      }
+      #gameResult {
+        position: fixed;
+        top: 30%;
+        font-size: 50px;
+      }
+      #win {
+        color: "green";
+      }
+      #lose {
+        color: rgb(255, 0, 0);
+      }
+      .title {
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <canvas width="800" height="800"></canvas>
+    </div>
+    <div id="scoreBoardContainer">
+      <span id="scoreBoard">0</span>
+    </div>
+    <div id="gameResult" class="hidden">
+      <div id="win" class="hidden">You win.</div>
+      <div id="lose" class="hidden">You died.</div>
+    </div>
+    <script>
+      let { canvas, context } = kontra.init();
+      let sprites = [];
+      let score = 0;
+      const scoreBoard = document.getElementById("scoreBoard");
+      const cols = ["white", "grey", "silver", "red"];
+      function createAsteroid(x, y, radius, col) {
+        let asteroid = kontra.Sprite({
+          type: "asteroid",
+          x,
+          y,
+          dx: Math.random() * 4 - 2,
+          dy: Math.random() * 4 - 2,
+          radius,
+          render() {
+            this.context.strokeStyle = col;
+            this.context.beginPath();
+            this.context.arc(0, 0, this.radius, 0, Math.PI * 2);
+            this.context.stroke();
+          },
+        });
+        sprites.push(asteroid);
+      }
+      for (let i = 0; i < 10; i++) {
+        createAsteroid(
+          100,
+          100,
+          30,
+          cols[Math.floor(Math.random() * cols.length)]
+        );
+      }
+      kontra.initKeys();
+      let ship = kontra.Sprite({
+        type: "ship",
+        x: 300,
+        y: 300,
+        radius: 6,
+        dt: 0,
+        render() {
+          this.context.strokeStyle = "green";
+          this.context.fillStyle = "green";
+          this.context.beginPath();
+          this.context.moveTo(-3, -10);
+          this.context.lineTo(30, 0);
+          this.context.lineTo(-3, 10);
+          this.context.closePath();
+          this.context.stroke();
+        },
+        update() {
+          if (kontra.keyPressed("left")) {
+            this.rotation += kontra.degToRad(-4);
+          } else if (kontra.keyPressed("right")) {
+            this.rotation += kontra.degToRad(4);
+          }
+          const cos = Math.cos(this.rotation);
+          const sin = Math.sin(this.rotation);
+          if (kontra.keyPressed("up")) {
+            this.ddx = cos * 0.05;
+            this.ddy = sin * 0.05;
+          } else {
+            this.ddx = this.ddy = 0;
+          }
+          this.advance();
+          if (this.velocity.length() > 5) {
+            this.dx *= 0.95;
+            this.dy *= 0.95;
+          }
+          this.dt += 1;
+          if (kontra.keyPressed("space") && this.dt > 0.25) {
+            this.dt = 0;
+            let bullet = kontra.Sprite({
+              type: "bullet",
+              color: "yellow",
+              x: this.x + cos * 18,
+              y: this.y + sin * 18,
+              dx: this.dx + cos * 5,
+              dy: this.dy + sin * 5,
+              ttl: 50,
+              radius: 2,
+              width: 2,
+              height: 2,
+            });
+            sprites.push(bullet);
+          }
+        },
+      });
+      sprites.push(ship);
+
+      let loop = kontra.GameLoop({
+        update() {
+          sprites.map((sprite) => {
+            sprite.update();
+            if (sprite.x < -sprite.radius) {
+              sprite.x = canvas.width + sprite.radius;
+            } else if (sprite.x > canvas.width + sprite.radius) {
+              sprite.x = 0 - sprite.radius;
+            }
+            if (sprite.y < -sprite.radius) {
+              sprite.y = canvas.height + sprite.radius;
+            } else if (sprite.y > canvas.height + sprite.radius) {
+              sprite.y = -sprite.radius;
+            }
+          });
+          for (let i = 0; i < sprites.length; i++) {
+            if (sprites[i].type === "asteroid") {
+              for (let j = 0; j < sprites.length; j++) {
+                if (sprites[j].type !== "asteroid") {
+                  let asteroid = sprites[i];
+                  let sprite = sprites[j];
+                  let dx = asteroid.x - sprite.x;
+                  let dy = asteroid.y - sprite.y;
+                  if (Math.hypot(dx, dy) < asteroid.radius + sprite.radius) {
+                    if (sprites[j].type === "bullet") {
+                      scoreBoard.innerHTML = score++;
+                    }
+                    if (sprites[j].type === "ship") {
+                      document
+                        .getElementById("gameResult")
+                        .classList.remove("hidden");
+                      document
+                        .getElementById("lose")
+                        .classList.remove("hidden");
+                      loop.stop();
+                    }
+                    asteroid.ttl = 0;
+                    sprite.ttl = 0;
+                    if (asteroid.radius > 10) {
+                      for (let i = 0; i < 3; i++) {
+                        createAsteroid(
+                          asteroid.x,
+                          asteroid.y,
+                          asteroid.radius / 2.5,
+                          cols[Math.floor(Math.random() * cols.length)]
+                        );
+                      }
+                    }
+                    break;
+                  }
+                }
+              }
+            }
+          }
+          sprites = sprites.filter((sprite) => sprite.isAlive());
+        },
+        render() {
+          sprites.map((sprite) => sprite.render());
+        },
+      });
+    </script>
+    <div id="space">
+      <div class="stars"></div>
+      <div class="stars"></div>
+      <div class="stars"></div>
+      <div class="stars"></div>
+      <div class="stars"></div>
+    </div>
+    <div id="startContainer">
+      <h1 class="title">Asteroids Redux</h1>
+      <button class="button" id="start">START</button>
+    </div>
+    <script>
+      window.addEventListener("load", function () {
+        const start = document.getElementById("start");
+        function runGame() {
+          start.removeEventListener("click", runGame, false);
+          start.remove();
+          loop.start();
+        }
+        start.addEventListener("click", runGame, false);
+      });
+    </script>
+  </body>
+</html>
