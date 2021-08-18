@@ -79,6 +79,11 @@
         position: fixed;
         top: 30%;
         z-index: 99999;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
       }
       #scoreBoard {
         font-size: 100px;
@@ -90,24 +95,54 @@
       #gameResult {
         position: fixed;
         top: 30%;
+        z-index: 99999;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
         font-size: 50px;
       }
       #win {
-        color: "green";
+        color: #1eff00;
       }
       #lose {
         color: rgb(255, 0, 0);
       }
-      .title {
+      .titleText {
         color: white;
       }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0px;
+        border: 0;
+        overflow: hidden;
+        display: block;
+      }
     </style>
+    <script type="text/javascript">
+      function resize_canvas() {
+        canvas = document.getElementById("canvas");
+        if (canvas.width < window.innerWidth) {
+          canvas.width = window.innerWidth;
+        }
+
+        if (canvas.height < window.innerHeight) {
+          canvas.height = window.innerHeight;
+        }
+      }
+    </script>
   </head>
-  <body>
+  <body onresize="resize_canvas()">
     <div class="container">
-      <canvas width="800" height="800"></canvas>
+      <canvas
+        id="canvas"
+        style="position: absolute; left: 0px; top: 0px"
+      ></canvas>
     </div>
-    <div id="scoreBoardContainer">
+    <div id="scoreBoardContainer" style="float: right">
       <span id="scoreBoard">0</span>
     </div>
     <div id="gameResult" class="hidden">
@@ -118,6 +153,12 @@
       let { canvas, context } = kontra.init();
       let sprites = [];
       let score = 0;
+      const u = "https://landmrk-dev.s3.eu-west-2.amazonaws.com";
+      var hit = new Audio(`${u}/hit.wav`);
+      var win = new Audio(`${u}/victory.wav`);
+      var loss = new Audio(`${u}/loss.wav`);
+      var laser = new Audio(`${u}/laser.wav`);
+
       const scoreBoard = document.getElementById("scoreBoard");
       const cols = ["white", "grey", "silver", "red"];
       function createAsteroid(x, y, radius, col) {
@@ -183,6 +224,8 @@
           }
           this.dt += 1;
           if (kontra.keyPressed("space") && this.dt > 0.25) {
+            laser.pause();
+            laser.play();
             this.dt = 0;
             let bullet = kontra.Sprite({
               type: "bullet",
@@ -227,7 +270,18 @@
                   let dy = asteroid.y - sprite.y;
                   if (Math.hypot(dx, dy) < asteroid.radius + sprite.radius) {
                     if (sprites[j].type === "bullet") {
+                      hit.play();
                       scoreBoard.innerHTML = score++;
+                      if (score > 99) {
+                        loop.stop();
+                        win.play();
+                        document
+                          .getElementById("gameResult")
+                          .classList.remove("hidden");
+                        document
+                          .getElementById("win")
+                          .classList.remove("hidden");
+                      }
                     }
                     if (sprites[j].type === "ship") {
                       document
@@ -237,6 +291,7 @@
                         .getElementById("lose")
                         .classList.remove("hidden");
                       loop.stop();
+                      loss.play();
                     }
                     asteroid.ttl = 0;
                     sprite.ttl = 0;
@@ -271,15 +326,21 @@
       <div class="stars"></div>
     </div>
     <div id="startContainer">
-      <h1 class="title">Asteroids Redux</h1>
+      <h1 class="titleText">Asteroids Redux</h1>
+      <h2 class="titleText">Score 100 to win</h2>
+      <h3 class="titleText">No extra lives</h3>
+      <h4 class="titleText">No mercy</h4>
       <button class="button" id="start">START</button>
     </div>
     <script>
       window.addEventListener("load", function () {
+        resize_canvas();
         const start = document.getElementById("start");
+        const startContainer = document.getElementById("startContainer");
         function runGame() {
           start.removeEventListener("click", runGame, false);
           start.remove();
+          startContainer.remove();
           loop.start();
         }
         start.addEventListener("click", runGame, false);
