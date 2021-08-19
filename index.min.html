@@ -1,25 +1,18 @@
-<html><head><script src="https://cdn.jsdelivr.net/npm/kontra@7.1.3/kontra.min.js"></script><style>canvas{padding-left:0;padding-right:0;margin-left:auto;margin-right:auto;display:block}html{background-color:#000}#space,.stars{overflow:hidden;position:absolute;top:0;bottom:0;left:0;right:0}.stars{background-image:radial-gradient(2px 2px at 20px 30px,#eee,rgba(0,0,0,0)),radial-gradient(2px 2px at 40px 70px,#fff,rgba(0,0,0,0)),radial-gradient(2px 2px at 50px 160px,#ddd,rgba(0,0,0,0)),radial-gradient(2px 2px at 90px 40px,#fff,rgba(0,0,0,0)),radial-gradient(2px 2px at 130px 80px,#fff,rgba(0,0,0,0)),radial-gradient(2px 2px at 160px 120px,#ddd,rgba(0,0,0,0));background-repeat:repeat;background-size:200px 200px;animation:zoom 5s infinite;opacity:0}.stars:nth-child(1){background-position:50% 50%;animation-delay:0s}.stars:nth-child(2){background-position:20% 60%;animation-delay:1s}.stars:nth-child(3){background-position:-20% -30%;animation-delay:2s}.stars:nth-child(4){background-position:40% -80%;animation-delay:3s}.stars:nth-child(5){background-position:-20% 30%;animation-delay:4s}@keyframes zoom{0%{opacity:0;transform:scale(.5);animation-timing-function:ease-in}85%{opacity:1;transform:scale(2.8);animation-timing-function:linear}100%{opacity:0;transform:scale(3.5)}}#startContainer{position:fixed;top:30%;z-index:99999;width:100%;display:flex;justify-content:center;align-items:center;flex-direction:column}#scoreBoard{font-size:100px;color:#fff}.hidden{display:none}#gameResult{position:fixed;top:30%;z-index:99999;width:100%;display:flex;justify-content:center;align-items:center;flex-direction:column;font-size:50px}#win{color:#1eff00}#lose{color:red}.title{color:#fff}body,html{width:100%;height:100%;margin:0;border:0;overflow:hidden;display:block}</style><script type="text/javascript">function resize_canvas(){canvas=document.getElementById("canvas"),canvas.width<window.innerWidth&&(canvas.width=window.innerWidth),canvas.height<window.innerHeight&&(canvas.height=window.innerHeight)}</script></head><body onresize="resize_canvas()"><div class="container"><canvas id="canvas" style="position:absolute;left:0;top:0"></canvas></div><div id="scoreBoardContainer"><span id="scoreBoard">0</span></div><div id="gameResult" class="hidden"><div id="win" class="hidden">You win.</div><div id="lose" class="hidden">You died.</div></div><script>let { canvas, context } = kontra.init();
+<html><head><script src="https://cdn.jsdelivr.net/npm/kontra@7.1.3/kontra.min.js"></script><style>@font-face{font-family:arcadeclassicregular;src:url(https://landmrk-dev.s3.eu-west-2.amazonaws.com/arcadeclassic-webfont.woff2) format("woff2"),url(https://landmrk-dev.s3.eu-west-2.amazonaws.com/arcadeclassic-webfont.woff) format("woff");font-weight:400;font-style:normal}canvas{padding-left:0;padding-right:0;margin-left:auto;margin-right:auto;display:block}html{font-family:arcadeclassicregular;background-color:#000}#space,.stars{overflow:hidden;position:absolute;top:0;bottom:0;left:0;right:0}.stars{background-image:radial-gradient(2px 2px at 20px 30px,#eee,rgba(0,0,0,0)),radial-gradient(2px 2px at 40px 70px,#fff,rgba(0,0,0,0)),radial-gradient(2px 2px at 50px 160px,#ddd,rgba(0,0,0,0)),radial-gradient(2px 2px at 90px 40px,#fff,rgba(0,0,0,0)),radial-gradient(2px 2px at 130px 80px,#fff,rgba(0,0,0,0)),radial-gradient(2px 2px at 160px 120px,#ddd,rgba(0,0,0,0));background-repeat:repeat;background-size:200px 200px;animation:zoom 5s infinite;opacity:0}.stars:nth-child(1){background-position:50% 50%;animation-delay:0s}.stars:nth-child(2){background-position:20% 60%;animation-delay:1s}.stars:nth-child(3){background-position:-20% -30%;animation-delay:2s}.stars:nth-child(4){background-position:40% -80%;animation-delay:3s}.stars:nth-child(5){background-position:-20% 30%;animation-delay:4s}@keyframes zoom{0%{opacity:0;transform:scale(.5);animation-timing-function:ease-in}85%{opacity:1;transform:scale(2.8);animation-timing-function:linear}100%{opacity:0;transform:scale(3.5)}}#startContainer{position:fixed;top:30%;z-index:99999;width:100%;display:flex;justify-content:center;align-items:center;flex-direction:column}#scoreBoard{font-size:100px;color:#fff}.hidden{display:none}#gameResult{position:fixed;top:30%;z-index:99999;width:100%;display:flex;justify-content:center;align-items:center;flex-direction:column;font-size:50px}#win{text-align:center;color:#1eff00}#lose{text-align:center;color:red}.titleText{color:#fff}body,html{width:100%;height:100%;margin:0;border:0;overflow:hidden;display:block}.button{font-family:arcadeclassicregular;font-size:40px;padding:6px;text-align:center}.startButton{background-color:green}.restartButton{background-color:#ff0}.credits{position:fixed;bottom:0;text-align:center;color:silver}a{color:#fff}</style><script type="text/javascript">function resize_canvas(){canvas=document.getElementById("canvas"),canvas.width<window.innerWidth&&(canvas.width=window.innerWidth),canvas.height<window.innerHeight&&(canvas.height=window.innerHeight)}</script></head><body onresize="resize_canvas()"><div class="container"><canvas id="canvas" style="position:absolute;left:0;top:0"></canvas></div><div id="scoreBoardContainer" style="float:right"><span id="scoreBoard">0</span></div><div id="gameResult" class="hidden"><div id="win" class="hidden">You win</div><div id="lose" class="hidden">You died.<br><button class="button restartButton" onclick="location.reload()">RESTART</button></div></div><script>let { canvas, context } = kontra.init();
       let sprites = [];
       let score = 0;
-
-      var hit = new Audio(
-        "https://landmrk-dev.s3.eu-west-2.amazonaws.com/hit.wav"
-      );
-      var win = new Audio(
-        "https://landmrk-dev.s3.eu-west-2.amazonaws.com/victory.wav"
-      );
-      var loss = new Audio(
-        "https://landmrk-dev.s3.eu-west-2.amazonaws.com/loss.wav"
-      );
-      var laser = new Audio(
-        "https://landmrk-dev.s3.eu-west-2.amazonaws.com/laser.wav"
-      );
+      const u = "https://landmrk-dev.s3.eu-west-2.amazonaws.com";
+      var hit = new Audio(`${u}/hit.wav`);
+      var win = new Audio(`${u}/victory.wav`);
+      var loss = new Audio(`${u}/loss.wav`);
+      var laser = new Audio(`${u}/laser.wav`);
+      var music = new Audio(`${u}/music.mp3`);
 
       const scoreBoard = document.getElementById("scoreBoard");
-      const cols = ["white", "grey", "silver", "red"];
+      const cols = ["yellow", "silver", "orange"];
       function createAsteroid(x, y, radius, col) {
         let asteroid = kontra.Sprite({
-          type: "asteroid",
+          type: "asteroid", 
           x,
           y,
           dx: Math.random() * 4 - 2,
@@ -78,7 +71,7 @@
             this.dx *= 0.95;
             this.dy *= 0.95;
           }
-          this.dt += 1;
+          this.dt += 1 / 30;
           if (kontra.keyPressed("space") && this.dt > 0.25) {
             laser.pause();
             laser.play();
@@ -91,9 +84,9 @@
               dx: this.dx + cos * 5,
               dy: this.dy + sin * 5,
               ttl: 50,
-              radius: 2,
-              width: 2,
-              height: 2,
+              radius: 4,
+              width: 4,
+              height: 4,
             });
             sprites.push(bullet);
           }
@@ -128,9 +121,10 @@
                     if (sprites[j].type === "bullet") {
                       hit.play();
                       scoreBoard.innerHTML = score++;
-                      if (score > 9) {
+                      if (score > 100) {
                         loop.stop();
                         win.play();
+                        music.pause();
                         document
                           .getElementById("gameResult")
                           .classList.remove("hidden");
@@ -146,6 +140,7 @@
                       document
                         .getElementById("lose")
                         .classList.remove("hidden");
+                      music.pause();
                       loop.stop();
                       loss.play();
                     }
@@ -172,7 +167,7 @@
         render() {
           sprites.map((sprite) => sprite.render());
         },
-      });</script><div id="space"><div class="stars"></div><div class="stars"></div><div class="stars"></div><div class="stars"></div><div class="stars"></div></div><div id="startContainer"><h1 class="title">Asteroids Redux</h1><button class="button" id="start">START</button></div><script>window.addEventListener("load", function () {
+      });</script><div id="space"><div class="stars"></div><div class="stars"></div><div class="stars"></div><div class="stars"></div><div class="stars"></div></div><div id="startContainer"><h1 class="titleText">Asteroids Redux</h1><h2 class="titleText">Score 100 to win</h2><h3 class="titleText">No extra lives</h3><h4 class="titleText">No mercy</h4><button class="button startButton" id="start">START&nbsp;</button><p class="credits">by @CHRISQUINNR / <a href="https://github.com/chrisquinnr">GITHUB</a> | <a href="https://twitter.com/chrisquinnr">TWITTER</a><br><br>Built with <a href="https://github.com/straker/kontra">Kontra.js</a> using asteroids <a href="https://medium.com/web-maker/making-asteroids-with-kontra-js-and-web-maker-95559d39b45f">tutorial by Steven Lambert</a><br>Music from Jeremy Blake - Powerup! ♫</p><script>window.addEventListener("load", function () {
         resize_canvas();
         const start = document.getElementById("start");
         const startContainer = document.getElementById("startContainer");
@@ -180,7 +175,8 @@
           start.removeEventListener("click", runGame, false);
           start.remove();
           startContainer.remove();
+          music.play();
           loop.start();
         }
         start.addEventListener("click", runGame, false);
-      });</script></body></html>
+      });</script></div></body></html>
